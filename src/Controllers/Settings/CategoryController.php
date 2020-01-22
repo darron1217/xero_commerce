@@ -19,8 +19,6 @@ class CategoryController extends SettingBaseController
             throw new \Exception;
         }
 
-        // 카테고리 관리자 view 사용
-        XePresenter::setSettingsSkinTargetId('');
         return XePresenter::make('category.show', compact('category'));
     }
 }
