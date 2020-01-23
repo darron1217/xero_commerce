@@ -8,6 +8,7 @@
 
 {{ XeFrontend::css('/assets/core/settings/css/admin_menu.css')->before('/assets/core/settings/css/admin.css')->load() }}
 
+
 {{ XeFrontend::js(
 [
     '/assets/core/lang/langEditorBox.bundle.js'
@@ -15,7 +16,7 @@
 )->appendTo('head')->load() }}
 
 {{ XeFrontend::js('/assets/core/common/js/xe.tree.js')->appendTo('body')->load() }}
-{{ XeFrontend::js('/assets/core/category/Category.js')->appendTo('body')->load() }}
+{{ XeFrontend::js(asset(Xpressengine\Plugins\XeroCommerce\Plugin::asset('assets/js/settings/Category.js')))->appendTo('body')->load() }}
 
 {{ XeFrontend::translation([
     'xe::required',
