@@ -8,6 +8,8 @@ use XeLang;
 use XeConfig;
 use XePresenter;
 use XeCategory;
+use XeStorage;
+use XeMedia;
 use Xpressengine\Category\Models\Category;
 use Xpressengine\Plugins\XeroCommerce\Plugin;
 use Xpressengine\Http\Request;
@@ -28,7 +30,7 @@ class CategoryController extends SettingBaseController
 
         return XePresenter::make('category.show', compact('category'));
     }
-	
+
     /**
      * Store a item of the category.
      *
@@ -70,7 +72,7 @@ class CategoryController extends SettingBaseController
     public function updateItem(Request $request, $id)
     {
         /** @var CategoryItem $item */
-        $item = XeCategory::items()->find($request->get('id'));
+        $item = \Xpressengine\Plugins\XeroCommerce\Models\CategoryItem::find($request->get('id'));
         if (!$item || $item->category->id !== Caster::cast($id)) {
             throw new InvalidArgumentHttpException;
         }
@@ -79,6 +81,15 @@ class CategoryController extends SettingBaseController
 
         $multiLang = XeLang::getPreprocessorValues($request->all(), session()->get('locale'));
         $item->readableWord = $multiLang['word'];
+
+        // 이미지 업로드
+        if ($image = $request->get('image')) {
+            if ($image == '__delete_file__') {
+                $this->removeImage($item);
+            } else {
+                $this->saveImage($image, $item);
+            }
+        }
 
         return XePresenter::makeApi($item->toArray());
     }
@@ -95,7 +106,7 @@ class CategoryController extends SettingBaseController
     public function destroyItem(Request $request, $id, $force = false)
     {
         /** @var CategoryItem $item */
-        $item = XeCategory::items()->find($request->get('id'));
+        $item = \Xpressengine\Plugins\XeroCommerce\Models\CategoryItem::find($request->get('id'));
         if (!$item || $item->category->id !== Caster::cast($id)) {
             throw new InvalidArgumentHttpException;
         }
@@ -114,28 +125,55 @@ class CategoryController extends SettingBaseController
         return XePresenter::makeApi([]);
     }
 
-    protected function saveImage($imageParm, Category $newCategory, $key = null)
+    /**
+     * Get children of a item.
+     *
+     * @param Request $request request
+     * @param string  $id      identifier
+     * @return \Xpressengine\Presenter\Presentable
+     */
+    public function children(Request $request, $id)
     {
-        $file = XeStorage::upload($imageParm, 'public/xero_commerce/product');
+        if ($request->get('id') === null) {
+            $children = XeCategory::cates()->find($id)->getProgenitors();
+        } else {
+            /** @var CategoryItem $item */
+            $item = \Xpressengine\Plugins\XeroCommerce\Models\CategoryItem::find($request->get('id'));
+            if (!$item || $item->category->id !== Caster::cast($id)) {
+                throw new InvalidArgumentHttpException;
+            }
+
+            $children = $item->getChildren();
+        }
+
+        foreach ($children as $child) {
+            // 이미지 호출
+            $child->image;
+            $child->readableWord = xe_trans($child->word);
+        }
+
+        return XePresenter::makeApi($children->toArray());
+    }
+
+    protected function saveImage($imageParm, \Xpressengine\Plugins\XeroCommerce\Models\CategoryItem $categoryItem)
+    {
+        $file = XeStorage::upload($imageParm, 'public/xero_commerce/category');
         $imageFile = XeMedia::make($file);
         XeMedia::createThumbnails($imageFile, 'widen', config('xe.media.thumbnail.dimensions'));
-        if (is_null($key)) {
-            $newProduct->images()->attach($imageFile->id);
+        if ($existImage = $categoryItem->image) {
+            $categoryItem->image()->updateExistingPivot($existImage->id, ['image_id' => $imageFile->id]);
         } else {
-            if ($existImage = $newProduct->images->get($key)) {
-                $newProduct->images()->updateExistingPivot($existImage->id, ['image_id' => $imageFile->id]);
-            }else{
-                $newProduct->images()->attach($imageFile->id);
-            }
+            $categoryItem->image()->save(['image_id' => $imageFile->id]);
         }
 
         return $imageFile;
     }
 
-    protected function removeImage(Product $product, $key)
+    protected function removeImage(\Xpressengine\Plugins\XeroCommerce\Models\CategoryItem $category)
     {
-        $image = $product->images->get($key);
-        $product->images()->detach($image->id);
+        if($image = $category->image) {
+            $category->image->delete();
+        }
     }
-	
+
 }

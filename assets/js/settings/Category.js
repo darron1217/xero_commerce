@@ -79,15 +79,15 @@ var Category = (function (XE, $, Tree) {
         var $body = $form.closest('.__xe_content_body')
 
         if ($body.find('[name=type]').length > 0) {
-          data.type = $body.find('[name=type]').val()
+          data.append('type', $body.find('[name=type]').val());
         }
 
         if ($body.find('[name=id]').length > 0) {
-          data.id = $body.find('[name=id]').val()
+          data.append('id', $body.find('[name=id]').val());
         }
 
         if ($body.find('[name=parent_id]').length > 0) {
-          data.parent_id = $body.find('[name=parent_id]').val()
+          data.append('parent_id', $body.find('[name=parent_id]').val());
         }
 
         _this.save(data)
@@ -196,7 +196,7 @@ var Category = (function (XE, $, Tree) {
           $('.btnNestedCategory').data({ open: false })
         }
       })
-		
+
 
     //사진 선택했을 때 미리보기 출력
     _$wrap.on('change', '.imageUpload', function (e) {
@@ -393,16 +393,17 @@ var Category = (function (XE, $, Tree) {
       $('button').prop('disabled', true)
 
       XE.ajax({
-        url: _config[item.type],
+        url: _config[item.get('type')],
         type: 'post',
-        dataType: 'json',
         data: item,
+        processData: false,
+        contentType: false,
         success: function (data) {
           $('button').prop('disabled', false)
 
-          switch (item.type) {
+          switch (item.get('type')) {
             case 'add':
-              var $container = (item.hasOwnProperty('parent_id')) ? $('#item_' + item.parent_id) : $('.__category_body > .item-container')
+              var $container = (item.get('parent_id')) ? $('#item_' + item.get('parent_id')) : $('.__category_body > .item-container')
 
               if ($container.hasClass('open')) {
                 $container.removeClass('open')
@@ -445,7 +446,7 @@ var Category = (function (XE, $, Tree) {
 
               break
             case 'modify':
-              var $item = $('#item_' + item.id)
+              var $item = $('#item_' + item.get('id'))
 
               $item.find('> .item-content').data({ item: data })
               $item.find('> .item-content .__xe_word').text(data.readableWord)
@@ -612,20 +613,13 @@ var Category = (function (XE, $, Tree) {
       })
     },
     /**
-     * Form요소를 JSON형태로 리턴한다.
+     * Form요소를 FormData형태로 리턴한다.
      * @memberof Category
      * @param {element} $form
      * @return {object}
      */
     formToJson: function ($form) {
-      var params = {}
-      var items = $form.serializeArray()
-
-      for (var i in items) {
-        params[items[i].name] = items[i].value
-      }
-
-      return params
+      return new FormData($form[0])
     }
   }
 })(window.XE, window.jQuery, window.Tree)

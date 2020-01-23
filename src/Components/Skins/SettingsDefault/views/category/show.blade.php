@@ -49,10 +49,10 @@
     $(function () {
         Category.init({
             load: '{{ route('manage.category.edit.item.children', ['id' => $category->id]) }}',
-            add: '{{ route('manage.category.edit.item.store', ['id' => $category->id]) }}',
-            modify: '{{ route('manage.category.edit.item.update', ['id' => $category->id]) }}',
-            remove: '{{ route('manage.category.edit.item.destroy', ['id' => $category->id, 'force' => false]) }}',
-            removeAll: '{{ route('manage.category.edit.item.destroy', ['id' => $category->id, 'force' => true]) }}',
+            add: '{{ route('xero_commerce::setting.category.store', ['id' => $category->id]) }}',
+            modify: '{{ route('xero_commerce::setting.category.update', ['id' => $category->id]) }}',
+            remove: '{{ route('xero_commerce::setting.category.remove', ['id' => $category->id, 'force' => false]) }}',
+            removeAll: '{{ route('xero_commerce::setting.category.remove', ['id' => $category->id, 'force' => true]) }}',
             move: '{{ route('manage.category.edit.item.move', ['id' => $category->id]) }}'
         });
     });

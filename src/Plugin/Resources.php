@@ -841,10 +841,19 @@ class Resources
                 ]);
 
                 //분류 관리
-                Route::get('/category', ['as' => 'xero_commerce::setting.category.index',
-                    'uses' => 'CategoryController@index',
-                    'settings_menu' => 'xero_commerce.product.category',
-                    'permission' => 'xero_commerce']);
+                Route::group(['prefix' => 'category'], function () {
+                    Route::get('/', ['as' => 'xero_commerce::setting.category.index',
+                        'uses' => 'CategoryController@index',
+                        'settings_menu' => 'xero_commerce.product.category',
+                        'permission' => 'xero_commerce']);
+
+                    Route::post('/store', ['as' => 'xero_commerce::setting.category.store',
+                        'uses' => 'CategoryController@storeItem']);
+                    Route::post('/update/{id}', ['as' => 'xero_commerce::setting.category.update',
+                        'uses' => 'CategoryController@updateItem']);
+                    Route::post('/remove/{id}', ['as' => 'xero_commerce::setting.category.remove',
+                        'uses' => 'CategoryController@destroyItem']);
+                });
 
                 //라벨 관리
                 Route::group(['prefix' => 'label'], function () {
