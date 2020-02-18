@@ -1615,11 +1615,11 @@ class Resources
 
                 // 시스템 관리자가 아니면
                 if ($isSystemAdmin == false) {
-                    $menus->forget(['dashboard', 'sitemap', 'user', 'contents', 'plugin', 'setting', 'lang', 'xeropay']);
+                    $menus->forget(['dashboard', 'sitemap', 'theme', 'contents', 'extension', 'setting', 'lang', 'xeropay']);
                     $xero_commerce = $menus->get('xero_commerce')->getChildren();
                     $xero_commerce->forget(['xero_commerce.config']);
                     $xero_commerce_product = $xero_commerce->get('xero_commerce.product')->getChildren();
-                    $xero_commerce_product->forget(['xero_commerce.product.label', 'xero_commerce.product.badge', 'xero_commerce.product.category']);
+                    $xero_commerce_product->forget(['xero_commerce.product.label', 'xero_commerce.product.badge']);
                 }
 
                 return $menus;
