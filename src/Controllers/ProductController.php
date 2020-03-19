@@ -61,6 +61,12 @@ class ProductController extends XeroCommerceBasicController
                 ->with('alert', ['type' => 'danger', 'message' => '존재하지 않는 상품입니다.']);
         }
 
+		// 최근 본 상품 기능
+		$productIds = $request->session()->get('recentProducts', []);
+		$productIds[] = $productId;
+		$productIds = array_slice($productIds, -5, 5);
+		$request->session()->put('recentProducts', $productIds);
+		
         return \XePresenter::make('product.show_new', ['product' => $product, 'category' => $category]);
     }
 
