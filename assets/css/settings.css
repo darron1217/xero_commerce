@@ -98,3 +98,7 @@
 .xero-settings .form-group .form-control + .form-control {
   margin-top: 10px;
 }
+
+.btn input[type=checkbox], .btn input[type=radio] {
+	margin: unset;
+}
