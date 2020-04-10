@@ -18,21 +18,20 @@ class CreateProductOption extends Migration
             $table->increments('id');
             $table->integer('product_id')->index();
             $table->string('name');
-            $table->string('display_type');
             $table->json('values');
             $table->integer('sort_order');
             $table->timestamps();
         });
 
-        // 사용자의 입력을 받을 수 있는 서브옵션 테이블 추가
-        Schema::create('xero_commerce_product_suboption', function (Blueprint $table) {
+        // 사용자의 입력을 받을 수 있는 커스텀옵션 테이블 추가
+        Schema::create('xero_commerce_product_custom_option', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('product_id')->index();
             $table->string('name');
-            $table->string('input_type');
+            $table->string('type');
             $table->integer('sort_order');
             $table->boolean('is_required');
-            $table->boolean('is_hidden');
+            $table->boolean('settings');
             $table->timestamps();
         });
 
@@ -61,6 +60,15 @@ class CreateProductOption extends Migration
                 ->default(\Xpressengine\Plugins\XeroCommerce\Models\Product::OPTION_TYPE_SIMPLE)
                 ->after('tax_type');
         });
+
+        // 카트그룹과 주문그룹에 커스텀 옵션값 추가
+        Schema::table('xero_commerce_cart_group', function (Blueprint $table) {
+            $table->json('custom_values')->after('unit_type');
+        });
+        Schema::table('xero_commerce_order_item_group', function (Blueprint $table) {
+            $table->json('custom_values')->after('unit_type');
+        });
+
     }
 
     /**
@@ -71,7 +79,7 @@ class CreateProductOption extends Migration
     public function down()
     {
         Schema::dropIfExists('xero_commerce_product_option');
-        Schema::dropIfExists('xero_commerce_product_suboption');
+        Schema::dropIfExists('xero_commerce_product_custom_option');
 
         Schema::table('xero_commerce_product_option_item', function (Blueprint $table) {
             $table->dropColumn('value_combination');
@@ -88,6 +96,13 @@ class CreateProductOption extends Migration
         });
         Schema::table('xero_commerce_products_revision', function (Blueprint $table) {
             $table->dropColumn('option_type');
+        });
+
+        Schema::table('xero_commerce_cart_group', function (Blueprint $table) {
+            $table->dropColumn('custom_values');
+        });
+        Schema::table('xero_commerce_order_item_group', function (Blueprint $table) {
+            $table->dropColumn('custom_values');
         });
     }
 }
